@@ -33,3 +33,6 @@ instance/
 # Environments
 .venv
 
+
+.vercel
+vercel.json
