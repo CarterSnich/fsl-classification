@@ -6,6 +6,9 @@ import base64
 
 app = Flask(__name__)
 
+app.config["MAX_CONTENT_LENGTH"] = None
+app.config["MAX_FORM_MEMORY_SIZE"] = 50 * (2**10) ** 2
+
 
 @app.route("/")
 def index():
@@ -14,9 +17,11 @@ def index():
 
 @app.route("/classify", methods=["POST"])
 def classify():
-    submitted_image = request.files["image"]
-    in_memory_image = np.asarray(bytearray(submitted_image.read()), dtype=np.uint8)
-    img = cv.imdecode(in_memory_image, cv.IMREAD_COLOR)
+    base64_image = request.form["image"]
+
+    image_data = base64.b64decode(base64_image)
+    np_array = np.frombuffer(image_data, np.uint8)
+    img = cv.imdecode(np_array, cv.IMREAD_COLOR)
 
     result = classify_sign(img)
 
@@ -30,12 +35,12 @@ def classify():
 
         return {
             "prediction": predicted_label,
-            "conifidence": confidence,
-            "annotatedImage": img_base64,
+            "confidence": confidence,
+            # "annotatedImage": img_base64,
         }
     else:
         return {
             "prediction": None,
-            "conifidence": None,
-            "annotatedImage": None,
+            "confidence": None,
+            # "annotatedImage": None,
         }

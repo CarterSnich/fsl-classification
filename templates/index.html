@@ -109,7 +109,7 @@
 
           if (data.prediction) {
             predictionSpan.innerText = data.prediction;
-            confidenceSpan.innerText = data.conifidence;
+            confidenceSpan.innerText = data.confidence;
             annotatedImg.src = `data:image/png;base64,${data.annotatedImage}`;
           } else {
             predictionSpan.innerText = "";
