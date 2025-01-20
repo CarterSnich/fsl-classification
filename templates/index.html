@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fsl-classification</title>
+
+    <style>
+      html {
+        height: 100vh;
+        margin: 0;
+        padding: 1rem;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100%;
+        margin: 0;
+        border: 1px solid black;
+
+        display: flex;
+        flex-direction: column;
+      }
+
+      main {
+        flex-grow: 1;
+        display: flex;
+      }
+
+      #top,
+      #left,
+      #right {
+        border: 1px solid black;
+      }
+
+      #top > *,
+      #left,
+      #right {
+        flex: 1;
+      }
+
+      #top {
+        display: flex;
+        align-items: center;
+        padding-inline: 1rem;
+        gap: 1rem;
+      }
+
+      img {
+        width: 100%;
+      }
+
+      main p {
+        text-align: center;
+      }
+
+      .img-container {
+        padding: 1rem;
+        display: grid;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="top">
+      <input type="file" name="image" id="image-input" accept="image/*" />
+      <p>prediction: <span id="prediction-span"></span></p>
+      <p>confidence: <span id="confidence-span"></span></p>
+    </div>
+
+    <main>
+      <div id="left">
+        <p>input image</p>
+        <div class="img-container">
+          <img src="" id="input-img" />
+        </div>
+      </div>
+      <div id="right">
+        <p>annotated image</p>
+
+        <div class="img-container">
+          <img src="" id="annotated-img" />
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const imageInput = document.getElementById("image-input");
+      const inputImg = document.getElementById("input-img");
+      const annotatedImg = document.getElementById("annotated-img");
+
+      const predictionSpan = document.getElementById("prediction-span");
+      const confidenceSpan = document.getElementById("confidence-span");
+
+      imageInput.addEventListener("change", async function (e) {
+        const image = event.target.files[0];
+
+        if (image) {
+          inputImg.src = URL.createObjectURL(image);
+
+          const body = new FormData();
+          body.append("image", image);
+
+          const res = await fetch("/classify", {
+            method: "POST",
+            body: body,
+          });
+
+          const data = await res.json();
+
+          if (data.prediction) {
+            predictionSpan.innerText = data.prediction;
+            confidenceSpan.innerText = data.conifidence;
+            annotatedImg.src = `data:image/png;base64,${data.annotatedImage}`;
+          } else {
+            predictionSpan.innerText = "";
+            confidenceSpan.innerText = "";
+            annotatedImg.src = "";
+            alert("No hand landmarks detected.");
+          }
+        } else {
+          alert("No image selected.");
+        }
+      });
+    </script>
+  </body>
+</html>
